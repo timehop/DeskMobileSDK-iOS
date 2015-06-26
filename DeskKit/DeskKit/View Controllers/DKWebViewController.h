@@ -29,11 +29,10 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <WebKit/WebKit.h>
 
-@interface DKWebViewController : UIViewController <WKNavigationDelegate>
+@interface DKWebViewController : UIViewController <UIWebViewDelegate>
 
-@property (strong, nonatomic, readonly) WKWebView *webView;
+@property (strong, nonatomic, readonly) UIWebView *webView;
 
 - (void)refresh;
 - (void)executeAction;

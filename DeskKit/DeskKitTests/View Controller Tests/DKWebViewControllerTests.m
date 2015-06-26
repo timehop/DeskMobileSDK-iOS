@@ -181,7 +181,7 @@
     
     id webViewMock = OCMPartialMock(self.viewController.webView);
     
-    OCMExpect([(WKWebView *)webViewMock goBack]);
+    OCMExpect([(UIWebView *)webViewMock goBack]);
     
     [self.viewController backButtonTapped:nil];
     
@@ -194,7 +194,7 @@
     
     id webViewMock = OCMPartialMock(self.viewController.webView);
     
-    OCMExpect([(WKWebView *)webViewMock goForward]);
+    OCMExpect([(UIWebView *)webViewMock goForward]);
     
     [self.viewController forwardButtonTapped:nil];
     

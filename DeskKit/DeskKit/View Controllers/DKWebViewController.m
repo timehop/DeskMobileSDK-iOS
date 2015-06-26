@@ -46,7 +46,7 @@ static NSString *const DKWebViewCanGoForward = @"canGoForward";
 @property (nonatomic) UIBarButtonItem *refreshButton;
 @property (nonatomic) UIBarButtonItem *actionButton;
 
-@property (strong, nonatomic) WKWebView *webView;
+@property (strong, nonatomic) UIWebView *webView;
 @property (nonatomic, assign) BOOL needsLoad;
 
 - (void)addWebViewToContainerView;
@@ -130,13 +130,13 @@ static NSString *const DKWebViewCanGoForward = @"canGoForward";
 - (void)addWebViewToContainerView
 {
     if (self.webView == nil) {
-        self.webView = [WKWebView new];
+        self.webView = [UIWebView new];
     }
     self.containerView.translatesAutoresizingMaskIntoConstraints = NO;
     self.webView.translatesAutoresizingMaskIntoConstraints = NO;
     [self.containerView addSubview:self.webView];
     [self addConstraintsFromWebViewToContainerView];
-    self.webView.navigationDelegate = self;
+    self.webView.delegate = self;
 }
 
 - (void)addConstraintsFromWebViewToContainerView
@@ -206,19 +206,15 @@ static NSString *const DKWebViewCanGoForward = @"canGoForward";
 
 #pragma mark - WebView Navigation
 
-- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation
-{
+- (void)webViewDidStartLoad:(UIWebView *)webView {
     [self webViewStartedLoading];
 }
 
-- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation
-      withError:(NSError *)error
-{
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
     [self webViewFinishedLoading];
 }
 
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
-{
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
     [self webViewFinishedLoading];
 }
 
