@@ -4,7 +4,7 @@ Pod::Spec.new do |s|
   s.homepage     = "https://github.com/forcedotcom/DeskMobileSDK-iOS"
   s.source       = { :git => "https://github.com/forcedotcom/DeskMobileSDK-iOS.git" }
   s.platform     = :ios, '8.0'
-  s.source_files = 'DeskKit/*.{h,m}', 'DeskKit/**/*.{h,m}'
-  s.resources 	 = 'DeskKit/**/*.{png,storyboard}'
+  s.source_files = 'DeskKit/DeskKit/*.{h,m}', 'DeskKit/**/*.{h,m}'
+  s.resources 	 = 'DeskKit/DeskKit/**/*.{png,storyboard}'
   s.requires_arc = true
 end
