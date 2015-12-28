@@ -87,12 +87,19 @@ static NSString *const DKListCellId = @"DKListCell";
     self.articleSearchController.searchBar.text = searchTerm;
 }
 
+- (void)dealloc {
+	[self.articleSearchController.view removeFromSuperview];
+}
+
+- (void)dismissSearchControllerWithCompletion:(void (^ __nullable)(void))completion {
+	[self.articleSearchController dismissViewControllerAnimated:YES completion:completion];
+}
+
 #pragma mark - UISearchBarDelegate
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
-    [self.articleSearchController dismissViewControllerAnimated:YES completion:nil];
 }
 
 #pragma mark - UITableViewDataSource & UITableViewDelegate

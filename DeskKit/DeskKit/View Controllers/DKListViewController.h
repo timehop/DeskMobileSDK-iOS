@@ -40,5 +40,6 @@ UITableViewDelegate, UISearchBarDelegate>
 - (void)setupSearchBar;
 - (void)setSearchBarPlaceholder:(NSString *)placeholder;
 - (void)setSearchBarSearchTerm:(NSString *)searchTerm;
+- (void)dismissSearchControllerWithCompletion:(void (^ __nullable)(void))completion;
 
 @end

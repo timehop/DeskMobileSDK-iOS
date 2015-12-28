@@ -129,10 +129,12 @@ static NSString *const DKArticlesSegueId = @"DKArticlesSegue";
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     [super searchBarSearchButtonClicked:searchBar];
-    if ([self.delegate respondsToSelector:@selector(topicsViewController:didSearchTerm:)]) {
-        NSString *text = [searchBar.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        [self.delegate topicsViewController:self didSearchTerm:text];
-    }
+    [self dismissViewControllerAnimated:YES completion:^{
+        if ([self.delegate respondsToSelector:@selector(topicsViewController:didSearchTerm:)]) {
+            NSString *text = [searchBar.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            [self.delegate topicsViewController:self didSearchTerm:text];
+        }
+    }];
 }
 
 #pragma mark - UITableViewDelegate
