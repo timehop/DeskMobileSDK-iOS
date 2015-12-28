@@ -27,25 +27,29 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <UIKit/UIKit.h>
+@import UIKit;
 #import <DeskAPIClient/DeskAPIClient.h>
 #import "DKTopicsViewController.h"
 #import "DKArticlesViewController.h"
-#import "DKContactUsWebViewController.h"
 #import "DKArticleDetailViewController.h"
+#import "DKContactUsViewController.h"
 
 @interface DKSession : NSObject
 
+// Contact Us Phone Number read from DKSettings
+@property (nonatomic, readonly, nullable) NSURL *contactUsPhoneNumberURL;
+
+NS_ASSUME_NONNULL_BEGIN
 /**
  Starts a DeskKit Session. This method should be called in your app delegate, or in any view controller
  you'll use to display the DeskKit support screens. You only need to call this once, but multiple calls
  have no negative effect if the session has already been started.
  
  @param hostname The Desk.com sitename, e.g. "yoursite.desk.com"
- @param apiToken The api token of the api application found in the site's admin admin
+ @param APIToken The API token of the API application found in the site's admin admin
  */
-+ (void)start:(NSString *)hostname
-     apiToken:(NSString *)apiToken;
++ (void)startWithHostname:(NSString *)hostname
+                 APIToken:(NSString *)APIToken;
 
 /**
  Returns the DeskKit Session singleton
@@ -76,11 +80,23 @@
 + (DKArticlesViewController *)newArticlesViewController;
 
 /**
- New instance of DKContactUsWebViewController.
+ New instance of a UIAlertController with Contact Us choices.
  
- @return new instance of DKContactUsWebViewController.
+ @param callHandler Block to execute when Call Us button is tapped.
+ @param emailHandler Block to execute when Email Us button is tapped.
+ 
+ @return instance of a UIAlertController.
  */
-+ (DKContactUsWebViewController *)newContactUsWebViewController;
+
++ (UIAlertController *)newContactUsAlertControllerWithCallHandler:(void (^)(UIAlertAction *action))callHandler
+                                                     emailHandler:(void (^)(UIAlertAction *action))emailHandler;
+
+/**
+ New instance of DKContactUsViewController.
+ 
+ @return new instance of DKContactUsViewController.
+ */
+- (DKContactUsViewController *)newContactUsViewController;
 
 /**
  New instance of DKArticleDetailViewController.
@@ -89,16 +105,16 @@
  */
 + (DKArticleDetailViewController *)newArticleDetailViewController;
 
+NS_ASSUME_NONNULL_END
+
 #pragma mark - Internal Methods
 
 /**
  The following are internal methods used by DeskKit. Generally clients will not need to call these methods.
  */
 
-- (BOOL)shouldShowContactUsButton;
-- (NSURL *)contactUsPhoneNumberUrl;
-- (BOOL)hasContactUsPhoneNumber;
-- (NSString *)contactUsEmailAddress;
-- (BOOL)hasContactUsEmailAddress;
++ (BOOL)hasContactUsPhoneNumber;
+- (nullable NSString *)contactUsToEmailAddress;
+- (void)hasContactUsToEmailAddressWithCompletionHandler:(void (^ __nonnull)(BOOL hasContactUsToEmailAddress))completionHandler;
 
 @end

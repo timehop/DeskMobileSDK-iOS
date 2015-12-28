@@ -33,7 +33,6 @@
 #import "UIAlertController+Additions.h"
 #import "DKNavigationBarTitleView.h"
 #import "DKSettings.h"
-#import "DKContactUsWebViewController.h"
 
 NSString *const DKTopicsViewControllerId = @"DKTopicsViewController";
 static NSString *const DKArticlesSegueId = @"DKArticlesSegue";
@@ -68,11 +67,6 @@ static NSString *const DKArticlesSegueId = @"DKArticlesSegue";
     [self setupAppearances];
     [self setupSearchBar];
     [self invalidateArticleCache];
-}
-
-- (void)viewWillAppear:(BOOL)animated
-{
-    [super viewWillAppear:animated];
 }
 
 #pragma mark - Setup

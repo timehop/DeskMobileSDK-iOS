@@ -28,14 +28,14 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "DSAPIClient.h"
+#import <DeskAPIClient/DSAPIClient.h>
 
 @interface DKAPIManager : NSObject
 
 + (instancetype)sharedInstance;
-- (DSAPIClient *)apiClientWithHostname:(NSString *)hostname
-                              apiToken:(NSString *)apiToken;
+- (DSAPIClient *)APIClientWithHostname:(NSString *)hostname
+                              APIToken:(NSString *)APIToken;
 - (BOOL)hasClient;
-- (NSURL *)contactUsWebFormUrl;
+- (NSURL *)contactUsWebFormURL;
 
 @end

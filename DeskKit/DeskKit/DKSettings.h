@@ -29,7 +29,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "DSAPIBrand.h"
+#import <DeskAPIClient/DSAPIBrand.h>
 
 @interface DKSettings : NSObject
 
@@ -38,21 +38,30 @@
 - (NSString *)contactUsPhoneNumber;
 - (BOOL)hasContactUsPhoneNumber;
 
-- (NSString *)contactUsEmailAddress;
-- (BOOL)hasContactUsEmailAddress;
+- (NSString *)contactUsToEmailAddress;
+- (BOOL)hasContactUsToEmailAddress;
 
-- (BOOL)showContactUsWebForm;
+- (NSString *)contactUsSubject;
+- (BOOL)hasContactUsSubject;
+
+- (BOOL)contactUsShowAllOptionalItems;
+- (BOOL)contactUsShowYourNameItem;
+- (BOOL)contactUsShowYourEmailItem;
+- (BOOL)contactUsShowSubjectItem;
+
+- (NSDictionary *)contactUsStaticCustomFields;
+- (BOOL)hasContactUsStaticCustomFields;
 
 - (NSString *)brandId;
 - (BOOL)hasBrandId;
 - (DSAPIBrand *)brand;
 
-- (NSDictionary *)topNavTintColorRgba;
-- (BOOL)hasTopNavTintColorRgba;
+- (NSDictionary *)topNavTintColorRGBA;
+- (BOOL)hasTopNavTintColorRGBA;
 - (UIColor *)topNavTintColor;
 
-- (NSDictionary *)topNavBarTintColorRgba;
-- (BOOL)hasTopNavBarTintColorRgba;
+- (NSDictionary *)topNavBarTintColorRGBA;
+- (BOOL)hasTopNavBarTintColorRGBA;
 - (UIColor *)topNavBarTintColor;
 
 - (NSString *)topNavIconFileName;

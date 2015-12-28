@@ -29,7 +29,7 @@
 //
 
 #import "DKArticleDetailViewModel.h"
-#import "DSAPIArticle.h"
+#import <DeskAPIClient/DSAPIArticle.h>
 #import "DKAPIManager.h"
 #import "DKConstants.h"
 
@@ -44,14 +44,14 @@
     return [self.article valueForKey:DKArticleSubjectKey];
 }
 
-- (NSURLRequest *)urlRequest
+- (NSURLRequest *)URLRequest
 {
-    return [NSURLRequest requestWithURL:self.url];
+    return [NSURLRequest requestWithURL:self.URL];
 }
 
-- (NSURL *)url
+- (NSURL *)URL
 {
-    return [NSURL URLWithString:[self.article valueForKey:DKArticlePublicUrlKey]];
+    return [NSURL URLWithString:[self.article valueForKey:DKArticlePublicURLKey]];
 }
 
 @end

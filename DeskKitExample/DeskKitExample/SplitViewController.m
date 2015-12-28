@@ -33,16 +33,11 @@
 #import "DKArticlesViewController.h"
 #import "DKArticleDetailViewController.h"
 #import "DKSession.h"
-#import "DKSettings.h"
+#import "NSDate+DSC.h"
 
 static NSString *const DKEmptyViewControllerId = @"DKEmptyViewController";
-#define DKMessageSent NSLocalizedString(@"Message Sent", @"Post-email alert title")
-#define DKMessageText NSLocalizedString(@"Thanks for sending us an email. Someone will respond as soon as possible.", @"Post-email alert text")
-#define DKOkAction NSLocalizedString(@"OK", @"OK Action")
 
-
-@interface SplitViewController () <DKTopicsViewControllerDelegte, DKArticlesViewControllerDelegate, DKContactUsAlertControllerDelegate,
-MFMailComposeViewControllerDelegate>
+@interface SplitViewController () <DKTopicsViewControllerDelegte, DKArticlesViewControllerDelegate, DKContactUsViewControllerDelegate>
 
 @property (nonatomic) DKTopicsViewController *topicsViewController;
 @property (nonatomic) DKArticleDetailViewController *articleDetailViewController;
@@ -175,6 +170,18 @@ separateSecondaryViewControllerFromPrimaryViewController:(UIViewController *)pri
     return [viewController article] != nil;
 }
 
+#pragma mark - DKContactUsViewControllerDelegate
+
+- (void)contactUsViewControllerDidSendMessage:(DKContactUsViewController *)viewController
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (void)contactUsViewControllerDidCancel:(DKContactUsViewController *)viewController
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+
 #pragma mark - DKTopicsViewControllerDelegate
 
 - (void)topicsViewController:(DKTopicsViewController *)topicsViewController didSelectTopic:(DSAPITopic *)topic articlesTopicViewModel:(DKArticlesTopicViewModel *)articlesTopicViewModel
@@ -219,10 +226,14 @@ separateSecondaryViewControllerFromPrimaryViewController:(UIViewController *)pri
 
 - (void)openActionSheet
 {
-    DKContactUsAlertController *contactUsSheet = [DKContactUsAlertController contactUsAlertController];
+    UIAlertController *contactUsSheet = [DKSession newContactUsAlertControllerWithCallHandler:^(UIAlertAction * __nonnull callAction) {
+        [[UIApplication sharedApplication] openURL:[[DKSession sharedInstance] contactUsPhoneNumberURL]];
+    } emailHandler:^(UIAlertAction * __nonnull emailAction) {
+        [self alertControllerDidTapEmailUs];
+    }];
+    
     UIBarButtonItem *contactUsButton = self.masterNavigationController.topViewController.toolbarItems[self.contactUsButtonIndex];
     contactUsSheet.popoverPresentationController.barButtonItem = contactUsButton;
-    contactUsSheet.delegate = self;
     
     [self presentViewController:contactUsSheet animated:YES completion:nil];
 }
@@ -232,20 +243,27 @@ separateSecondaryViewControllerFromPrimaryViewController:(UIViewController *)pri
     [self openActionSheet];
 }
 
-- (void)alertControllerDidTapSendEmail
+- (void)alertControllerDidTapEmailUs
 {
-    if ([[DKSettings sharedInstance] showContactUsWebForm]) {
-        DKContactUsWebViewController *vc = [DKSession newContactUsWebViewController];
-        UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonTapped:)];
-        vc.navigationItem.rightBarButtonItem = doneButton;
-        vc.navigationItem.title = NSLocalizedString(@"Email Us", comment: @"Email Us");
-        UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:vc];
-        nvc.toolbarHidden = NO;
-        nvc.modalPresentationStyle = UIModalPresentationPageSheet;
-        [self presentViewController:nvc animated:YES completion:nil];
-    } else {
-        [self openMailComposeViewController];
-    }
+    DKContactUsViewController *contactUsVC = [[DKSession sharedInstance] newContactUsViewController];
+    contactUsVC.delegate = self;
+
+/*
+    // Example of adding custom fields
+    // 1. Grab initial custom fields populated from DeskKitSettings.plist
+    NSMutableDictionary *customFields = [contactUsVC.customFields mutableCopy];
+    // 2. Add your own dynamic custom fields.
+    [customFields addEntriesFromDictionary:[self dynamicCustomFields]];
+    // 3. Assign back to property.
+    contactUsVC.customFields = customFields;
+*/
+
+    // Configure additional properties of DKContactUsViewController here
+
+    
+    UINavigationController *nvc = [[UINavigationController alloc] initWithRootViewController:contactUsVC];
+    nvc.modalPresentationStyle = UIModalPresentationPageSheet;
+    [self presentViewController:nvc animated:YES completion:nil];
 }
 
 - (void)doneButtonTapped:(id)sender
@@ -253,58 +271,17 @@ separateSecondaryViewControllerFromPrimaryViewController:(UIViewController *)pri
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 
-/*  Note that due to a bug in the iOS 8 simulator, the MFMailComposeViewController can currently only
- be tested on devices. See http://stackoverflow.com/questions/25961068/uiviewserviceinterfaceerrordomain
- */
-- (void)openMailComposeViewController
-{
-    MFMailComposeViewController *vc = [MFMailComposeViewController new];
-    vc.mailComposeDelegate = self;
-    [vc setToRecipients:@[ [DKSession sharedInstance].contactUsEmailAddress ]];
-    [self presentViewController:vc animated:YES completion:nil];
-}
+#pragma mark - Custom Fields Example
 
-#pragma mark - MFMailComposeViewControllerDelegate
-
-- (void)mailComposeController:(MFMailComposeViewController *)controller
-          didFinishWithResult:(MFMailComposeResult)result
-                        error:(NSError *)error
+- (NSDictionary *)dynamicCustomFields
 {
-    [self dismissViewControllerAnimated:YES completion:nil];
-    [self showMailAlertWithResult:result error:error];
-}
-
-- (void)showMailAlertWithResult:(MFMailComposeResult)result error:(NSError *)error
-{
-    NSString *messageTitle;
-    NSString *messageText;
-    
-    switch (result) {
-        case MFMailComposeResultFailed:
-            messageTitle = DKError;
-            messageText = error.localizedDescription;
-            break;
-        case MFMailComposeResultSent:
-            messageTitle = DKMessageSent;
-            messageText = DKMessageText;
-        default:
-            break;
-    }
-    
-    if (messageTitle && messageText) {
-        UIAlertController *ac = [UIAlertController alertControllerWithTitle:messageTitle
-                                                                    message:messageText
-                                                             preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okAction = [UIAlertAction actionWithTitle:DKOkAction
-                                                           style:UIAlertActionStyleDefault
-                                                         handler:nil];
-        
-        [ac addAction:okAction];
-        
-        [self presentViewController:ac
-                           animated:YES
-                         completion:nil];
-    }
+    // The keys and value types must match the custom fields defined in your Desk admin site.
+    return @{@"my_case_boolean_custom_field" : @YES,
+             @"my_case_date_custom_field" : [[NSDate date] stringWithISO8601Format],
+             @"my_case_list_custom_field" : @"C",
+             @"my_case_number_custom_field" : @45, // Integer
+             @"my_case_text_custom_field" : @"value1"
+             };
 }
 
 #pragma mark - View Controllers from Storyboard

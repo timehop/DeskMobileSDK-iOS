@@ -27,25 +27,24 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import <Foundation/Foundation.h>
+@import Foundation;
 #import <OCMock/OCMock.h>
 #import "DKSession.h"
 #import "DKFixtures.h"
 #import "DKTopicsViewController.h"
 #import "DKArticlesViewController.h"
 #import "DKArticleDetailViewController.h"
-#import "DKContactUsWebViewController.h"
 
 extern NSTimeInterval const DKDefaultTestTimeout;
 extern NSString *const DKPListName;
 extern NSString *const DKHostnameKey;
-extern NSString *const DKApiTokenKey;
+extern NSString *const DKAPITokenKey;
 
 @class DKAPIManager;
 
 @interface DKTestUtils : NSObject
 
-+ (DKAPIManager *)authorizedApiManager;
++ (DKAPIManager *)authorizedAPIManager;
 + (NSDictionary *)authDictionaryFromPlist;
 
 #pragma mark - ViewController instanitiators
@@ -53,6 +52,5 @@ extern NSString *const DKApiTokenKey;
 + (DKTopicsViewController *)topicsViewController;
 + (DKArticlesViewController *)articlesViewController;
 + (DKArticleDetailViewController *)articleDetailViewController;
-+ (DKContactUsWebViewController *)contactUsWebViewController;
 
 @end

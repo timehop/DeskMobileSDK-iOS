@@ -4,19 +4,19 @@
 //
 //  Copyright (c) 2015, Salesforce.com, Inc.
 //  All rights reserved.
-//  
+//
 //  Redistribution and use in source and binary forms, with or without modification, are permitted provided
 //  that the following conditions are met:
-//  
+//
 //     Redistributions of source code must retain the above copyright notice, this list of conditions and the
 //     following disclaimer.
-//  
+//
 //     Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
 //     the following disclaimer in the documentation and/or other materials provided with the distribution.
-//  
+//
 //     Neither the name of Salesforce.com, Inc. nor the names of its contributors may be used to endorse or
 //     promote products derived from this software without specific prior written permission.
-//  
+//
 //  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 //  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
 //  PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
@@ -41,28 +41,23 @@ static NSInteger const DSMailboxesPerPage = 100;
 
 @interface DKSession ()
 
-@property (nonatomic, strong) NSURL *contactUsPhoneNumberUrl;
-@property (nonatomic, strong) NSString *contactUsEmailAddress;
-
-+ (void)setupAppearances;
-- (void)setupContactUsEmail;
-- (void)fetchInboundMailboxes;
-- (DSAPIMailbox *)firstEnabledInboundMailboxFromPage:(DSAPIPage *)page;
-- (NSString *)firstEnabledInboundEmailAddressFromPage:(DSAPIPage *)page;
+@property (nonatomic, strong) NSString *contactUsToEmailAddress;
+@property (nonatomic) NSOperationQueue *APICallbackQueue;
+@property (nonatomic) NSURLSessionDataTask *listMailboxesTask;
 
 @end
 
 @implementation DKSession
 
-+ (void)start:(NSString *)hostname
-     apiToken:(NSString *)apiToken
++ (void)startWithHostname:(NSString *)hostname
+                 APIToken:(NSString *)APIToken
 {
     [DKSession sharedInstance];
-    [[DKAPIManager sharedInstance] apiClientWithHostname:hostname
-                                                apiToken:apiToken];
-
+    [[DKAPIManager sharedInstance] APIClientWithHostname:hostname
+                                                APIToken:APIToken];
+    
     [[DKSession sharedInstance] setupContactUsEmail];
-
+    
     [DKSession setupAppearances];
 }
 
@@ -76,6 +71,15 @@ static NSInteger const DSMailboxesPerPage = 100;
     return sharedInstance;
 }
 
+- (instancetype)init
+{
+    self = [super init];
+    if (self) {
+        _APICallbackQueue = [NSOperationQueue new];
+    }
+    return self;
+}
+
 + (BOOL)isSessionStarted
 {
     return [DKAPIManager sharedInstance].hasClient;
@@ -84,6 +88,23 @@ static NSInteger const DSMailboxesPerPage = 100;
 + (UIStoryboard *)storyboard
 {
     return [UIStoryboard storyboardWithName:DKStoryboardName bundle:[NSBundle bundleForClass:[self class]]];
+}
+
++ (void)setupAppearances
+{
+    NSDictionary *topNavTitleTextAttributes = @{
+                                                NSForegroundColorAttributeName : [[DKSettings sharedInstance] topNavTintColor],
+                                                };
+    
+    [[UINavigationBar appearance] setTitleTextAttributes:topNavTitleTextAttributes];
+    
+    [[UINavigationBar appearance] setBarTintColor:[[DKSettings sharedInstance] topNavBarTintColor]];
+    [[UINavigationBar appearance] setTintColor:[[DKSettings sharedInstance] topNavTintColor]];
+    
+    [[UIToolbar appearance] setBarTintColor:[[DKSettings sharedInstance] topNavBarTintColor]];
+    [[UIToolbar appearance] setTintColor:[[DKSettings sharedInstance] topNavTintColor]];
+    
+    [[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], [UIToolbar class], nil] setTintColor:[[DKSettings sharedInstance] topNavTintColor]];
 }
 
 + (DKTopicsViewController *)newTopicsViewController
@@ -96,9 +117,80 @@ static NSInteger const DSMailboxesPerPage = 100;
     return [[[self class] storyboard] instantiateViewControllerWithIdentifier:DKArticlesViewControllerId];
 }
 
-+ (DKContactUsWebViewController *)newContactUsWebViewController
+#pragma mark - Contact US
+
++ (UIAlertController *)newContactUsAlertControllerWithCallHandler:(void (^)(UIAlertAction *action))callHandler
+                                                     emailHandler:(void (^)(UIAlertAction *action))emailHandler;
 {
-    return [[[self class] storyboard] instantiateViewControllerWithIdentifier:DKContactUsWebViewControllerId];
+    UIAlertController *contactUsSheet = [UIAlertController alertControllerWithTitle:DKContactUs
+                                                                            message:nil
+                                                                     preferredStyle:UIAlertControllerStyleActionSheet];
+    [[self class] addCancelButtonWithAlertController:contactUsSheet];
+    [[self class] addCallUsButtonWithAlertController:contactUsSheet handler:callHandler];
+    [[self class] addEmailUsButtonWithAlertController:contactUsSheet handler:emailHandler];
+    return contactUsSheet;
+}
+
++ (void)addCancelButtonWithAlertController:(UIAlertController *)controller
+{
+    [controller addAction:[UIAlertAction actionWithTitle:DKCancel
+                                                   style:UIAlertActionStyleCancel
+                                                 handler:nil]];
+}
+
++ (void)addCallUsButtonWithAlertController:(UIAlertController *)controller handler:(void (^)(UIAlertAction *action))handler
+{
+    if ([DKSession sharedInstance].contactUsPhoneNumberURL) {
+        [[self class] addCallUsActionWithAlertController:controller handler:handler];
+    }
+}
+
++ (UIAlertAction *)addCallUsActionWithAlertController:(UIAlertController *)controller handler:(void (^)(UIAlertAction *action))handler;
+{
+    UIAlertAction *callUsAction = [UIAlertAction actionWithTitle:DKCallUs
+                                                           style:UIAlertActionStyleDefault
+                                                         handler:handler];
+    [controller addAction:callUsAction];
+    return callUsAction;
+}
+
++ (void)addEmailUsButtonWithAlertController:(UIAlertController *)controller handler:(void (^)(UIAlertAction *action))handler
+{
+    UIAlertAction *emailUsAction = [[self class] addEmailUsActionWithAlertController:controller handler:handler];
+    emailUsAction.enabled = NO;
+    [[DKSession sharedInstance] hasContactUsToEmailAddressWithCompletionHandler:^(BOOL hasContactUsToEmailAddress) {
+        emailUsAction.enabled = hasContactUsToEmailAddress;
+    }];
+}
+
++ (UIAlertAction *)addEmailUsActionWithAlertController:(UIAlertController *)controller handler:(void (^)(UIAlertAction *action))handler
+{
+    UIAlertAction *emailUsAction = [UIAlertAction actionWithTitle:DKEmailUs
+                                                            style:UIAlertActionStyleDefault
+                                                          handler:handler];
+    [controller addAction:emailUsAction];
+    return emailUsAction;
+}
+
+- (DKContactUsViewController *)newContactUsViewController
+{
+    DKSettings *settings = [DKSettings sharedInstance];
+    DKContactUsViewController *vc = [[[self class] storyboard] instantiateViewControllerWithIdentifier:DKContactUsViewControllerId];
+    vc.toEmailAddress = self.contactUsToEmailAddress;
+    
+    if (settings.hasContactUsSubject) {
+        vc.subject = settings.contactUsSubject;
+    }
+    vc.showSubjectItem = settings.contactUsShowSubjectItem;
+    vc.showAllOptionalItems = settings.contactUsShowAllOptionalItems;
+    vc.showYourNameItem = settings.contactUsShowYourNameItem;
+    vc.showYourEmailItem = settings.contactUsShowYourEmailItem;
+    
+    if (settings.hasContactUsStaticCustomFields) {
+        vc.customFields = settings.contactUsStaticCustomFields;
+    }
+
+    return vc;
 }
 
 + (DKArticleDetailViewController *)newArticleDetailViewController
@@ -106,69 +198,80 @@ static NSInteger const DSMailboxesPerPage = 100;
     return [[[self class] storyboard] instantiateViewControllerWithIdentifier:DKArticleDetailViewControllerId];
 }
 
-+ (void)setupAppearances
+#pragma mark - Phone
+
+- (NSURL *)contactUsPhoneNumberURL
 {
-    NSDictionary *topNavTitleTextAttributes = @{
-        NSForegroundColorAttributeName : [[DKSettings sharedInstance] topNavTintColor],
-    };
-
-    [[UINavigationBar appearance] setTitleTextAttributes:topNavTitleTextAttributes];
-
-    [[UINavigationBar appearance] setBarTintColor:[[DKSettings sharedInstance] topNavBarTintColor]];
-    [[UINavigationBar appearance] setTintColor:[[DKSettings sharedInstance] topNavTintColor]];
-
-    [[UIBarButtonItem appearanceWhenContainedIn:[UINavigationBar class], nil]
-        setTitleTextAttributes:topNavTitleTextAttributes
-                      forState:UIControlStateNormal];
-}
-
-- (BOOL)shouldShowContactUsButton
-{
-    return [self hasContactUsEmailAddress] || [self hasContactUsPhoneNumber];
-}
-
-- (NSURL *)contactUsPhoneNumberUrl
-{
-    if (!self.hasContactUsPhoneNumber) {
+    if (![[self class] hasContactUsPhoneNumber]) {
         return nil;
     } else {
-        NSURL *url = [NSURL URLWithString:[DKTelpromptProtocol stringByAppendingString:[DKSettings sharedInstance].contactUsPhoneNumber]];
+        NSURL *URL = [NSURL URLWithString:[DKTelpromptProtocol stringByAppendingString:[DKSettings sharedInstance].contactUsPhoneNumber]];
         // Add a check to ensure that the telprompt url can be opened. See this link for more info:
         // http://stackoverflow.com/questions/20072123/telprompt-vs-tel-and-app-approval
-        return [[UIApplication sharedApplication] canOpenURL:url] ? url : [NSURL URLWithString:[DKTelProtocol stringByAppendingString:[DKSettings sharedInstance].contactUsPhoneNumber]];
+        BOOL canOpenURL = [[UIApplication sharedApplication] canOpenURL:URL];
+        if (canOpenURL) {
+            return URL;
+        }
+        URL = [NSURL URLWithString:[DKTelProtocol stringByAppendingString:[DKSettings sharedInstance].contactUsPhoneNumber]];
+        canOpenURL = [[UIApplication sharedApplication] canOpenURL:URL];
+        if (canOpenURL) {
+            return URL;
+        }
+        return nil;
     }
 }
 
-- (BOOL)hasContactUsPhoneNumber
++ (BOOL)hasContactUsPhoneNumber
 {
     return [DKSettings sharedInstance].hasContactUsPhoneNumber;
 }
 
+#pragma mark - Email
+
 - (void)setupContactUsEmail
 {
-    if ([DKSettings sharedInstance].hasContactUsEmailAddress) {
-        self.contactUsEmailAddress = [DKSettings sharedInstance].contactUsEmailAddress;
+    if ([DKSettings sharedInstance].hasContactUsToEmailAddress) {
+        self.contactUsToEmailAddress = [DKSettings sharedInstance].contactUsToEmailAddress;
     } else {
-        [[DKSession sharedInstance] fetchInboundMailboxes];
+        [[DKSession sharedInstance] fetchInboundMailboxesWithCompletionHandler:nil];
     }
 }
 
-- (void)fetchInboundMailboxes
+- (void)fetchInboundMailboxesWithCompletionHandler:(void (^)(void))completionHandler
 {
-    [DSAPIMailbox listMailboxesOfType:DSAPIMailboxTypeInbound
-                           parameters:@{ kPageKey : @1,
-                                         kPerPageKey : @(DSMailboxesPerPage) }
-                              success:^(DSAPIPage *page) {
-                                  if ([page.totalEntries integerValue]) {
-                                      self.contactUsEmailAddress = [self firstEnabledInboundEmailAddressFromPage:page];
-                                  }
-                              }
-                              failure:nil];
+    [self.listMailboxesTask cancel];
+    self.listMailboxesTask = [DSAPIMailbox listMailboxesOfType:DSAPIMailboxTypeInbound
+                                                    parameters:@{ kPageKey : @1,
+                                                                  kPerPageKey : @(DSMailboxesPerPage) }
+                                                         queue:self.APICallbackQueue
+                                                       success:^(DSAPIPage *page) {
+                                                           if ([page.totalEntries integerValue]) {
+                                                               self.contactUsToEmailAddress = [self firstEnabledInboundEmailAddressFromPage:page];
+                                                           }
+                                                           if (completionHandler) {
+                                                               dispatch_sync(dispatch_get_main_queue(), ^{
+                                                                   completionHandler();
+                                                               });
+                                                           }
+                                                       }
+                                                       failure:^(NSHTTPURLResponse *response, NSError *error) {
+                                                           if (completionHandler) {
+                                                               dispatch_sync(dispatch_get_main_queue(), ^{
+                                                                   completionHandler();
+                                                               });
+                                                           }
+                                                       }];
 }
 
-- (BOOL)hasContactUsEmailAddress
+- (void)hasContactUsToEmailAddressWithCompletionHandler:(void (^ __nonnull)(BOOL hasContactUsToEmailAddress))completionHandler
 {
-    return self.contactUsEmailAddress.length > 0;
+    if (self.contactUsToEmailAddress.length > 0) {
+        completionHandler(YES);
+    } else {
+        [self fetchInboundMailboxesWithCompletionHandler:^{
+            self.contactUsToEmailAddress.length > 0 ? completionHandler(YES) : completionHandler(NO);
+        }];
+    }
 }
 
 - (DSAPIMailbox *)firstEnabledInboundMailboxFromPage:(DSAPIPage *)page

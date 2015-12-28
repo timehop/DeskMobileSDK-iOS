@@ -31,15 +31,22 @@
 #import "DKSettings.h"
 #import "NSTextCheckingResult+Additions.h"
 #import "UIColor+Additions.h"
+#import "NSString+Additions.h"
+#import "NSDate+DSC.h"
 
 static NSString *const DKSettingsPListName = @"DeskKitSettings";
 static NSString *const DKSettingsContactUsPhoneNumberKey = @"ContactUsPhoneNumber";
-static NSString *const DKSettingsContactUsEmailKey = @"ContactUsEmailAddress";
-static NSString *const DKSettingsShowContactUsWebForm = @"ShowContactUsWebForm";
+static NSString *const DKSettingsContactUsToEmailKey = @"ContactUsToEmailAddress";
+static NSString *const DKSettingsContactUsSubject = @"ContactUsSubject";
+static NSString *const DKSettingsContactUsShowAllOptionalItems = @"ContactUsShowAllOptionalItems";
+static NSString *const DKSettingsContactUsShowYourNameItem = @"ContactUsShowYourNameItem";
+static NSString *const DKSettingsContactUsShowYourEmailItem = @"ContactUsShowYourEmailItem";
+static NSString *const DKSettingsContactUsShowSubjectItem = @"ContactUsShowSubjectItem";
+static NSString *const DKSettingsContactUsStaticCustomFields = @"ContactUsStaticCustomFields";
 static NSString *const DKSettingsBrandIdKey = @"BrandId";
 static NSString *const DKSettingsTopNavKey = @"NavigationBar";
-static NSString *const DKSettingsTopNavTintColorRgbaKey = @"TintColorRGBA";
-static NSString *const DKSettingsTopNavBarTintColorRgbaKey = @"BarTintColorRGBA";
+static NSString *const DKSettingsTopNavTintColorRGBAKey = @"TintColorRGBA";
+static NSString *const DKSettingsTopNavBarTintColorRGBAKey = @"BarTintColorRGBA";
 static NSString *const DKSettingsTopNavIconFileNameKey = @"TopNavIconFileName";
 static NSString *const DKEmailRegex = @".+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z]*";
 
@@ -76,15 +83,15 @@ static NSString *const DKEmailRegex = @".+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z
 - (NSDictionary *)settingsDictionaryFromPlist
 {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSURL *plistUrl = [bundle URLForResource:DKSettingsPListName
+    NSURL *plistURL = [bundle URLForResource:DKSettingsPListName
                                withExtension:@"plist"];
 
-    return [NSDictionary dictionaryWithContentsOfURL:plistUrl];
+    return [NSDictionary dictionaryWithContentsOfURL:plistURL];
 }
 
 - (NSString *)contactUsPhoneNumber
 {
-    return [self.settings valueForKey:DKSettingsContactUsPhoneNumberKey];
+    return self.settings[DKSettingsContactUsPhoneNumberKey];
 }
 
 - (BOOL)hasContactUsPhoneNumber
@@ -107,14 +114,14 @@ static NSString *const DKEmailRegex = @".+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z
                            andResultType:NSTextCheckingTypePhoneNumber];
 }
 
-- (NSString *)contactUsEmailAddress
+- (NSString *)contactUsToEmailAddress
 {
-    return [self.settings valueForKey:DKSettingsContactUsEmailKey];
+    return self.settings[DKSettingsContactUsToEmailKey];
 }
 
-- (BOOL)hasContactUsEmailAddress
+- (BOOL)hasContactUsToEmailAddress
 {
-    if (!self.contactUsEmailAddress.length) {
+    if (!self.contactUsToEmailAddress.length) {
         return NO;
     }
 
@@ -124,22 +131,70 @@ static NSString *const DKEmailRegex = @".+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z
                                                                       options:NSRegularExpressionCaseInsensitive
                                                                         error:&error];
 
-    NSRange inputRange = NSMakeRange(0, self.contactUsEmailAddress.length);
-    NSArray *results = [regex matchesInString:self.contactUsEmailAddress options:0 range:inputRange];
+    NSRange inputRange = NSMakeRange(0, self.contactUsToEmailAddress.length);
+    NSArray *results = [regex matchesInString:self.contactUsToEmailAddress options:0 range:inputRange];
 
     return [NSTextCheckingResult results:results
                          matchInputRange:inputRange
                            andResultType:NSTextCheckingTypeRegularExpression];
 }
 
-- (BOOL)showContactUsWebForm
+- (NSString *)contactUsSubject
 {
-    return [[self.settings valueForKey:DKSettingsShowContactUsWebForm] boolValue];
+    return self.settings[DKSettingsContactUsSubject];
+}
+
+- (BOOL)hasContactUsSubject
+{
+    return [NSString dkIsNotEmptyString:self.contactUsSubject];
+}
+
+- (BOOL)contactUsShowAllOptionalItems
+{
+    return [self.settings[DKSettingsContactUsShowAllOptionalItems] boolValue];
+}
+
+- (BOOL)contactUsShowYourNameItem
+{
+    return [self.settings[DKSettingsContactUsShowYourNameItem] boolValue];
+}
+
+- (BOOL)contactUsShowYourEmailItem
+{
+    return [self.settings[DKSettingsContactUsShowYourEmailItem] boolValue];
+}
+
+- (BOOL)contactUsShowSubjectItem
+{
+    return [self.settings[DKSettingsContactUsShowSubjectItem] boolValue];
+}
+
+- (NSDictionary *)contactUsStaticCustomFields
+{
+    return [self dateFormattedDictionaryWithPlistDictionary:self.settings[DKSettingsContactUsStaticCustomFields]];
+}
+
+- (NSDictionary *)dateFormattedDictionaryWithPlistDictionary:(NSDictionary *)plistDictionary
+{
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] initWithCapacity:plistDictionary.count];
+    [plistDictionary enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+        if ([obj isKindOfClass:[NSDate class]]) {
+            result[key] = [(NSDate *)obj stringWithISO8601Format];
+        } else {
+            result[key] = obj;
+        }
+    }];
+    return [result copy];
+}
+
+- (BOOL)hasContactUsStaticCustomFields
+{
+    return self.contactUsStaticCustomFields != nil;
 }
 
 - (NSString *)brandId
 {
-    return [self.settings valueForKey:DKSettingsBrandIdKey];
+    return self.settings[DKSettingsBrandIdKey];
 }
 
 - (BOOL)hasBrandId
@@ -159,42 +214,42 @@ static NSString *const DKEmailRegex = @".+@([A-Za-z0-9-]+\\.)+[A-Za-z]{2}[A-Za-z
 
 - (NSDictionary *)topNavSettings
 {
-    return [self.settings valueForKey:DKSettingsTopNavKey];
+    return self.settings[DKSettingsTopNavKey];
 }
 
-- (NSDictionary *)topNavTintColorRgba
+- (NSDictionary *)topNavTintColorRGBA
 {
-    return [self.topNavSettings valueForKey:DKSettingsTopNavTintColorRgbaKey];
+    return self.topNavSettings[DKSettingsTopNavTintColorRGBAKey];
 }
 
-- (BOOL)hasTopNavTintColorRgba
+- (BOOL)hasTopNavTintColorRGBA
 {
-    return self.topNavTintColorRgba != nil;
+    return self.topNavTintColorRGBA != nil;
 }
 
 - (UIColor *)topNavTintColor
 {
-    return self.hasTopNavTintColorRgba ? [UIColor colorWithDictionary:self.topNavTintColorRgba] : [UIColor blackColor];
+    return self.hasTopNavTintColorRGBA ? [UIColor colorWithDictionary:self.topNavTintColorRGBA] : [UIColor blackColor];
 }
 
-- (NSDictionary *)topNavBarTintColorRgba
+- (NSDictionary *)topNavBarTintColorRGBA
 {
-    return [self.topNavSettings valueForKey:DKSettingsTopNavBarTintColorRgbaKey];
+    return self.topNavSettings[DKSettingsTopNavBarTintColorRGBAKey];
 }
 
-- (BOOL)hasTopNavBarTintColorRgba
+- (BOOL)hasTopNavBarTintColorRGBA
 {
-    return self.topNavBarTintColorRgba != nil;
+    return self.topNavBarTintColorRGBA != nil;
 }
 
 - (UIColor *)topNavBarTintColor
 {
-    return self.hasTopNavBarTintColorRgba ? [UIColor colorWithDictionary:self.topNavBarTintColorRgba] : [UIColor whiteColor];
+    return self.hasTopNavBarTintColorRGBA ? [UIColor colorWithDictionary:self.topNavBarTintColorRGBA] : [UIColor whiteColor];
 }
 
 - (NSString *)topNavIconFileName
 {
-    return [self.settings valueForKey:DKSettingsTopNavIconFileNameKey];
+    return self.settings[DKSettingsTopNavIconFileNameKey];
 }
 
 - (BOOL)hasTopNavIconFileName
