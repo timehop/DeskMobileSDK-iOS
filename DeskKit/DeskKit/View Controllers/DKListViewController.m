@@ -99,7 +99,7 @@ static NSString *const DKListCellId = @"DKListCell";
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+    [self.tableView deselectRowAtIndexPath:(NSIndexPath *)[self.tableView indexPathForSelectedRow] animated:YES];
 }
 
 #pragma mark - UITableViewDataSource & UITableViewDelegate

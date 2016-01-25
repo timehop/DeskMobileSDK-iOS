@@ -140,7 +140,7 @@ static NSString *const DKWebViewCanGoForward = @"canGoForward";
 
 - (NSArray *)constraintsForWebView
 {
-    NSDictionary *views = NSDictionaryOfVariableBindings(_webView);
+    NSDictionary *views = NSDictionaryOfVariableBindings(self.webView);
     
     NSArray *hConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:NSLayoutFormatAlignAllTop metrics:nil views:views];
     NSArray *vConstraints = [NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_webView]|" options:NSLayoutFormatAlignAllLeft metrics:nil views:views];
@@ -154,7 +154,7 @@ static NSString *const DKWebViewCanGoForward = @"canGoForward";
         // viewController is visible
         [self refresh];
     } else {
-        _needsLoad = YES;
+        self.needsLoad = YES;
     }
 }
 

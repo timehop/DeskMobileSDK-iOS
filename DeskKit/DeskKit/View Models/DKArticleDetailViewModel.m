@@ -51,7 +51,7 @@
 
 - (NSURL *)URL
 {
-    return [NSURL URLWithString:[self.article valueForKey:DKArticlePublicURLKey]];
+    return [NSURL URLWithString:(NSString *)[self.article valueForKey:DKArticlePublicURLKey]];
 }
 
 @end

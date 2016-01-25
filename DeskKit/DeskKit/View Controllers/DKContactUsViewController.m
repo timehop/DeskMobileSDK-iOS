@@ -231,11 +231,11 @@ static NSString *const DKContactUsTextViewTableViewCellId = @"DKContactUsTextVie
 - (NSIndexPath *)nextIndexPathWithCurrentIndexPath:(NSIndexPath *)currentIndexPath
 {
     NSIndexPath *nextIndexPath = nil;
-    if (currentIndexPath.row + 1 < [self.viewModel.sections[currentIndexPath.section] count]) {
+    if (currentIndexPath.row + 1 < (NSInteger)[self.viewModel.sections[currentIndexPath.section] count]) {
         // Next row in same section
         nextIndexPath = [NSIndexPath indexPathForRow:currentIndexPath.row + 1 inSection:currentIndexPath.section];
     } else {
-        if (currentIndexPath.section + 1 < self.viewModel.sections.count) {
+        if (currentIndexPath.section + 1 < (NSInteger)self.viewModel.sections.count) {
             // First row in next section
             nextIndexPath = [NSIndexPath indexPathForRow:0 inSection:currentIndexPath.section + 1];
         }

@@ -67,7 +67,7 @@
 
 - (NSInteger)totalPages
 {
-    return (NSInteger)ceil([self.totalItems floatValue] / DKItemsPerPage);
+    return ceil([self.totalItems floatValue] / DKItemsPerPage);
 }
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section

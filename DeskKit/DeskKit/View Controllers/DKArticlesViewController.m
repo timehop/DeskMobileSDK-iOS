@@ -90,7 +90,7 @@ NSString *const DKArticlesViewControllerId = @"DKArticlesViewController";
     return self.topicViewModel.topic ? DKSearchArticlesInTopic : DKSearchAllArticles;
 }
 
-- (void)setViewModel:(DKArticlesTopicViewModel *)viewModel topic:(DSAPITopic *)topic;
+- (void)setViewModel:(DKArticlesTopicViewModel *)viewModel topic:(DSAPITopic *)topic
 {
     self.title = [topic valueForKey:DKTopicNameKey];
     self.topicViewModel = viewModel;

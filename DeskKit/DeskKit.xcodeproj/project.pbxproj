@@ -558,7 +558,6 @@
 				1C75FC0019BF34FE00971E46 /* Frameworks */,
 				1C75FC0119BF34FE00971E46 /* Resources */,
 				3BD7BAF95FCB42EBA4D36924 /* Copy Pods Resources */,
-				3375BEFC89EE9ED541BEE53D /* Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -646,21 +645,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		3375BEFC89EE9ED541BEE53D /* Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Embed Pods Frameworks";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-DeskKitTests/Pods-DeskKitTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		3BD7BAF95FCB42EBA4D36924 /* Copy Pods Resources */ = {
@@ -873,6 +857,25 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.desk.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = (
+					"-Weverything",
+					"-Wno-objc-missing-property-synthesis",
+					"-Wno-gnu",
+					"-Wno-cstring-format-directive",
+					"-Wno-documentation-unknown-command",
+					"-Wno-language-extension-token",
+					"-Wno-assign-enum",
+					"-Wno-float-equal",
+					"-Wno-undef",
+					"-Wno-covered-switch-default",
+					"-Wno-vla",
+					"-Wno-auto-import",
+					"-Rno-module-build",
+					"-Wno-documentation",
+					"-Wno-objc-interface-ivars",
+					"-Wno-reserved-id-macro",
+					"-Wno-format-nonliteral",
+				);
 			};
 			name = Debug;
 		};
@@ -890,6 +893,25 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.desk.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = (
+					"-Weverything",
+					"-Wno-objc-missing-property-synthesis",
+					"-Wno-gnu",
+					"-Wno-cstring-format-directive",
+					"-Wno-documentation-unknown-command",
+					"-Wno-language-extension-token",
+					"-Wno-assign-enum",
+					"-Wno-float-equal",
+					"-Wno-undef",
+					"-Wno-covered-switch-default",
+					"-Wno-vla",
+					"-Wno-auto-import",
+					"-Rno-module-build",
+					"-Wno-documentation",
+					"-Wno-objc-interface-ivars",
+					"-Wno-reserved-id-macro",
+					"-Wno-format-nonliteral",
+				);
 			};
 			name = Release;
 		};

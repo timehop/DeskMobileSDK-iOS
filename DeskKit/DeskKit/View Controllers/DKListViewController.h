@@ -34,12 +34,12 @@
 UITableViewDelegate, UISearchBarDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property (nonatomic, strong) DKListViewModel *viewModel;
+@property (nonatomic, strong, nullable) DKListViewModel *viewModel;
 
 - (void)beginLoadingData;
 - (void)setupSearchBar;
-- (void)setSearchBarPlaceholder:(NSString *)placeholder;
-- (void)setSearchBarSearchTerm:(NSString *)searchTerm;
+- (void)setSearchBarPlaceholder:(nullable NSString *)placeholder;
+- (void)setSearchBarSearchTerm:(nullable NSString *)searchTerm;
 - (void)dismissSearchControllerWithCompletion:(void (^ __nullable)(void))completion;
 
 @end

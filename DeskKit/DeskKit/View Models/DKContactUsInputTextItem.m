@@ -33,7 +33,7 @@
 
 - (NSAttributedString *)placeholderText
 {
-    if (_required) {
+    if (self.required) {
         return _placeholderText;
     } else {
         NSString *newString = [NSString stringWithFormat:@"%@ (%@)", _placeholderText.string, DKOptional];
