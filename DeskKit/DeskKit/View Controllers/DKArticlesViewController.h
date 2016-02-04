@@ -39,8 +39,9 @@ extern NSString *const DKArticlesViewControllerId;
 @protocol DKArticlesViewControllerDelegate <NSObject>
 
 @optional
-- (void)articlesViewController:(DKArticlesViewController *)articlesViewController didChangeSearchTerm:(NSString *)searchTerm;
+- (void)articlesViewController:(DKArticlesViewController *)articlesViewController didSearchTerm:(NSString *)searchTerm;
 - (void)articlesViewController:(DKArticlesViewController *)articlesViewController didSelectArticle:(DSAPIArticle *)article;
+- (void)articlesViewController:(DKArticlesViewController *)articlesViewController didSelectSearchedArticle:(DSAPIArticle *)article;
 
 @end
 
@@ -49,6 +50,6 @@ extern NSString *const DKArticlesViewControllerId;
 @property (nonatomic, weak) id<DKArticlesViewControllerDelegate>delegate;
 
 - (void)setViewModel:(DKArticlesTopicViewModel *)viewModel topic:(DSAPITopic *)topic;
-- (void)setSearchTerm:(NSString *)searchTerm;
+
 
 @end

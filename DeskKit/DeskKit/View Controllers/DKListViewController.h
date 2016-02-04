@@ -30,10 +30,13 @@
 #import <UIKit/UIKit.h>
 #import "DKListViewModel.h"
 
+@class DKSearchResultsViewController;
+
 @interface DKListViewController : UIViewController <DKListViewModelDelegate, UITableViewDataSource,
 UITableViewDelegate, UISearchBarDelegate>
 
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+<<<<<<< HEAD
 @property (nonatomic, strong, nullable) DKListViewModel *viewModel;
 
 - (void)beginLoadingData;
@@ -41,5 +44,14 @@ UITableViewDelegate, UISearchBarDelegate>
 - (void)setSearchBarPlaceholder:(nullable NSString *)placeholder;
 - (void)setSearchBarSearchTerm:(nullable NSString *)searchTerm;
 - (void)dismissSearchControllerWithCompletion:(void (^ __nullable)(void))completion;
+=======
+@property (nonatomic, strong) DKListViewModel *viewModel;
+@property (nonatomic) DKSearchResultsViewController *resultsViewController;
+
+- (void)beginLoadingData;
+- (void)setupSearchWithResultsViewController:(DKSearchResultsViewController *)resultsViewController;
+- (void)setSearchBarPlaceholder:(NSString *)placeholder;
+- (void)setSearchBarSearchTerm:(NSString *)searchTerm;
+>>>>>>> b0cdc1414356ca7b36c92714cc1a26dfdb47a443
 
 @end

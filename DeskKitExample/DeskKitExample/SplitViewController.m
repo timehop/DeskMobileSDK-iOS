@@ -29,7 +29,6 @@
 //
 
 #import "SplitViewController.h"
-#import "DKTopicsViewController.h"
 #import "DKArticlesViewController.h"
 #import "DKArticleDetailViewController.h"
 #import "DKSession.h"
@@ -59,6 +58,8 @@ static NSString *const DKEmptyViewControllerId = @"DKEmptyViewController";
 {
     [super viewDidLoad];
     self.delegate = self;
+    [self setupAppearances];
+
     self.topicsViewController = [self newTopicsViewController];
     [self.masterNavigationController setViewControllers:@[self.topicsViewController]];
     self.masterNavigationController.toolbarHidden = NO;
@@ -91,6 +92,24 @@ static NSString *const DKEmptyViewControllerId = @"DKEmptyViewController";
 - (UINavigationController *)detailNavigationController
 {
     return self.viewControllers.lastObject;
+}
+
+- (void)setupAppearances
+{
+    UIColor *tintColor = [UIColor colorWithRed:16.0/255.0 green:122.0/255.0 blue:135.0/255.0 alpha:1.0];
+    UIColor *barTintColor = [UIColor colorWithRed:240.0/255.0 green:240.0/255.0 blue:240.0/255.0 alpha:1.0];
+    
+    NSDictionary *topNavTitleTextAttributes = @{
+                                                NSForegroundColorAttributeName : tintColor,
+                                                };
+    
+    [[UINavigationBar appearance] setTitleTextAttributes:topNavTitleTextAttributes];
+    
+    [[UINavigationBar appearance] setBarTintColor:barTintColor];
+    [[UINavigationBar appearance] setTintColor:tintColor];
+    
+    [[UIToolbar appearance] setBarTintColor:barTintColor];
+    [[UIToolbar appearance] setTintColor:tintColor];
 }
 
 #pragma mark - Split View Controller Delegate
@@ -192,22 +211,24 @@ separateSecondaryViewControllerFromPrimaryViewController:(UIViewController *)pri
     [self.masterNavigationController pushViewController:controller animated:YES];
 }
 
-- (void)topicsViewController:(DKTopicsViewController *)topicsViewController didSearchTerm:(NSString *)searchTerm
+- (void)topicsViewController:(DKTopicsViewController *)topicsViewController didSelectSearchedArticle:(DSAPIArticle *)article
 {
-    DKArticlesViewController *controller = [self newArticlesViewController];
-    controller.delegate = self;
-    [controller setSearchTerm:searchTerm];
-    [self.masterNavigationController pushViewController:controller animated:YES];
+    [self showArticle:article];
 }
 
 #pragma mark - DKArticlesViewControllerDelegate
 
-- (void)articlesViewController:(DKArticlesViewController *)articlesViewController didChangeSearchTerm:(NSString *)searchTerm
+- (void)articlesViewController:(DKArticlesViewController *)articlesViewController didSelectSearchedArticle:(DSAPIArticle *)article
 {
-    [self.topicsViewController setSearchBarSearchTerm:searchTerm];
+    [self showArticle:article];
 }
 
 - (void)articlesViewController:(DKArticlesViewController *)articlesViewController didSelectArticle:(DSAPIArticle *)article
+{
+    [self showArticle:article];
+}
+
+- (void)showArticle:(DSAPIArticle *)article
 {
     self.selectedArticle = article;
     if (!self.articleDetailViewController) {

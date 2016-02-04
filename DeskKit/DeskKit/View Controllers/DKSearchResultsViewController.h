@@ -1,8 +1,8 @@
 //
-//  DKContactUsItem.m
+//  DKSearchResultsViewController.h
 //  DeskKit
 //
-//  Created by Desk.com on 7/28/15.
+//  Created by Desk.com on 9/19/14.
 //  Copyright (c) 2015, Salesforce.com, Inc.
 //  All rights reserved.
 //
@@ -28,16 +28,25 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 
-#import "DKContactUsItem.h"
+#import "DKListViewController.h"
 
-@implementation DKContactUsItem
+extern NSString *const DKSearchResultsViewControllerId;
 
-- (instancetype)initWithIdentifer:(NSString *)identifier
-{
-    self = [super init];
-    if (self) {
-        _identifier = identifier;
-    }
-    return self;
-}
+@class DKSearchResultsViewController;
+
+@protocol DKSearchResultsViewControllerDelegate <NSObject>
+
+@optional
+- (void)searchResultsViewController:(DKSearchResultsViewController *)searchResultsViewController didSelectArticle:(DSAPIArticle *)article;
+
+@end
+
+@interface DKSearchResultsViewController : DKListViewController
+
+@property (nonatomic, weak) id<DKSearchResultsViewControllerDelegate>delegate;
+
+- (void)reset;
+- (void)resetSearchWithSearchTerm:(NSString *)searchTerm topic:(DSAPITopic *)topic;
+- (NSString *)textFromSearchBar:(UISearchBar *)searchBar;
+
 @end

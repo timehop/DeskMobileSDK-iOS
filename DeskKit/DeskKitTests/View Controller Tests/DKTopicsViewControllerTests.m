@@ -33,7 +33,6 @@
 #import <MessageUI/MessageUI.h>
 #import "DKTestUtils.h"
 #import "DKArticlesTopicViewModel.h"
-#import "DKNavigationBarTitleView.h"
 
 @interface MFMailComposeViewControllerTest : UIViewController
 
@@ -61,10 +60,10 @@
 @property (nonatomic, strong) NSMutableDictionary *cachedArticlesViewModels;
 @property (nonatomic, weak) IBOutlet UIButton *contactUsButton;
 @property (nonatomic, weak) IBOutlet UIView *contactUsContainerView;
-@property (nonatomic, strong) UISearchController *articleSearchController;
+@property (nonatomic, strong) UISearchController *searchController;
 
 - (void)setupAppearances;
-- (void)setupSearchBar;
+- (void)setupSearch;
 - (void)setupContactUsSheet;
 - (void)setTopicOnArticlesViewController:(DKArticlesViewController *)viewController
                                     cell:(UITableViewCell *)cell;
@@ -99,12 +98,6 @@
     self.viewModelMock = OCMPartialMock(self.viewController.viewModel);
     self.mock = OCMPartialMock(self.viewController);
     self.testSession = [[DKSession alloc] init];
-}
-
-- (void)testSetTitleSetsUpNavigationTitleView
-{
-    [self.viewController setTitle:@"Foo"];
-    XCTAssertTrue([self.viewController.navigationItem.titleView isKindOfClass:[DKNavigationBarTitleView class]]);
 }
 
 - (void)testCellHasTopicName
@@ -177,7 +170,7 @@
 
 - (void)testViewDidLoadSetsUpSearchBar
 {
-    OCMExpect([self.mock setupSearchBar]);
+    OCMExpect([self.mock setupSearch]);
 
     [self.viewController viewDidLoad];
 
@@ -187,13 +180,12 @@
 - (void)testSearchButtonClicked
 {
     id tableViewMock = OCMPartialMock(self.viewController.tableView);
-    id articleSearchControllerMock = OCMPartialMock(self.viewController.articleSearchController);
+    id articleSearchControllerMock = OCMPartialMock(self.viewController.searchController);
     id delegate = OCMProtocolMock(@protocol(DKTopicsViewControllerDelegte));
     self.viewController.delegate = delegate;
     NSString *searchTerm = @"foo";
     
     OCMExpect([tableViewMock deselectRowAtIndexPath:OCMOCK_ANY animated:YES]);
-    OCMExpect([articleSearchControllerMock dismissViewControllerAnimated:YES completion:nil]);
     OCMExpect([delegate topicsViewController:self.viewController didSearchTerm:searchTerm]);
     
     UISearchBar *searchBar = [UISearchBar new];
