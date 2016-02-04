@@ -123,16 +123,7 @@ static NSString *const DKArticlesSegueId = @"DKArticlesSegue";
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-<<<<<<< HEAD
-    [super searchBarSearchButtonClicked:searchBar];
-    [self dismissViewControllerAnimated:YES completion:^{
-        if ([self.delegate respondsToSelector:@selector(topicsViewController:didSearchTerm:)]) {
-            NSString *text = [searchBar.text stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-            [self.delegate topicsViewController:self didSearchTerm:text];
-        }
-    }];
-=======
-    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
+    [self.tableView deselectRowAtIndexPath:(NSIndexPath *)[self.tableView indexPathForSelectedRow] animated:YES];
     NSString *text = [self.resultsViewController textFromSearchBar:searchBar];
     [self sendDelegateSearchTerm:text];
     [self.resultsViewController resetSearchWithSearchTerm:text topic:nil];
@@ -143,7 +134,6 @@ static NSString *const DKArticlesSegueId = @"DKArticlesSegue";
     if ([self.delegate respondsToSelector:@selector(topicsViewController:didSearchTerm:)]) {
         [self.delegate topicsViewController:self didSearchTerm:searchTerm];
     }
->>>>>>> b0cdc1414356ca7b36c92714cc1a26dfdb47a443
 }
 
 #pragma mark - DKSearchResultsViewControllerDelegate

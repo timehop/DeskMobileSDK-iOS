@@ -92,23 +92,11 @@ static NSString *const DKListCellId = @"DKListCell";
     self.searchController.searchBar.text = searchTerm;
 }
 
-- (void)dealloc {
-	[self.articleSearchController.view removeFromSuperview];
-}
-
-- (void)dismissSearchControllerWithCompletion:(void (^ __nullable)(void))completion {
-	[self.articleSearchController dismissViewControllerAnimated:YES completion:completion];
-}
-
 #pragma mark - UISearchBarDelegate
 
 - (void)searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
-<<<<<<< HEAD
     [self.tableView deselectRowAtIndexPath:(NSIndexPath *)[self.tableView indexPathForSelectedRow] animated:YES];
-=======
-    [self.tableView deselectRowAtIndexPath:[self.tableView indexPathForSelectedRow] animated:YES];
->>>>>>> b0cdc1414356ca7b36c92714cc1a26dfdb47a443
 }
 
 - (void)searchBarCancelButtonClicked:(UISearchBar *)searchBar
@@ -149,7 +137,7 @@ static NSString *const DKListCellId = @"DKListCell";
   willDisplayCell:(UITableViewCell *)cell
 forRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSUInteger middleRowOfSection = [self.viewModel numberOfItemsInSection:indexPath.section] / 2;
+    NSInteger middleRowOfSection = [self.viewModel numberOfItemsInSection:indexPath.section] / 2;
     if (indexPath.row == middleRowOfSection) {
         NSUInteger nextSection = indexPath.section + 1;
         [self.viewModel fetchItemsInSection:nextSection];
