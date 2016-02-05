@@ -1,6 +1,6 @@
 platform :ios, '8.0'
 
-pod 'DeskAPIClient', '~> 2.0.0'
+pod 'DeskAPIClient', :git => 'https://github.com/timehop/DeskApiClient-ObjC.git', :tag => '2.0.0-timehop'
 
 target 'DeskKitTests', :exclusive => true do
     pod 'OCMock', '~> 3.0.2'
